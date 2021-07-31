@@ -12,8 +12,6 @@ var Jira = {
             if (!Jira.params.url.endsWith('/')) {
                 Jira.params.url += '/';
             }
-
-            Jira.params.url += 'rest/servicedeskapi/';
         }
     },
 
@@ -102,9 +100,12 @@ var Jira = {
             }
         });
 
-        var response,
-            url = Jira.params.url + query,
-            request = new CurlHttpRequest();
+        var response, request = new CurlHttpRequest();
+        if (!query.endsWith('/transitions')) {
+            var url = Jira.params.url + 'rest/servicedeskapi/' + query;
+        } else {
+            var url = Jira.params.url + 'rest/api/latest/' + query;
+        }
 
         request.AddHeader('Content-Type: application/json');
         request.AddHeader('Authorization: Basic ' + btoa(Jira.params.user + ':' + Jira.params.password));
@@ -274,6 +275,16 @@ try {
         }
         comment.body = params.alert_message;
         Jira.request('post', 'request/' + Jira.params.request_key + '/comment', comment);
+
+        // On recovery, set ticket to a different state, if specified.
+        if (jira.recovery_transition_id) {
+            var transitionData = {
+                transition: {
+                    id: jira.recovery_transition_id
+                }
+            };
+            Jira.request('post', 'issue/' + Jira.params.request_key + '/transitions', transitionData);
+        }
     }
 
     return JSON.stringify(result);
@@ -282,4 +293,3 @@ catch (error) {
     Zabbix.Log(3, '[ Jira Service Desk Webhook ] ERROR: ' + error);
     throw 'Sending failed: ' + error;
 }
-
