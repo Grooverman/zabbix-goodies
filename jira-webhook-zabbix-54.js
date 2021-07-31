@@ -276,7 +276,7 @@ try {
         comment.body = params.alert_message;
         Jira.request('post', 'request/' + Jira.params.request_key + '/comment', comment);
 
-        // Set ticket to new state on recovery, if specified.
+        // On recovery, set ticket to a different state, if specified.
         if (jira.recovery_transition_id) {
             var transitionData = {
                 transition: {
