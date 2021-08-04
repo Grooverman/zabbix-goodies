@@ -7,4 +7,4 @@
 
 In this image `jira_recovery_transition_id`, `jira_request_type_id`, and `jira_servicedesk_id` are just examples specific to your instance.
 
-If you want to disable automatic closing of tickets, just leave `jira_recovery_transition_id` empty. 
+If you want to disable automatic closing of tickets, just leave `jira_recovery_transition_id` empty or remove it. 
