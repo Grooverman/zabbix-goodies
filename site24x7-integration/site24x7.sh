@@ -27,8 +27,7 @@ if [ -n "$grant_token" ]; then
 		sed -i "s/^refresh_token=.*\$/refresh_token=$refresh_token/" $cred
 		sed -i 's/^grant_token=.*/grant_token=/' $cred
 	else
-		echo Something went wrong.
-		exit
+		echo Something went wrong.; exit 125
 	fi
 else
 	# get new access token
@@ -41,8 +40,7 @@ else
 	if [ -n "$access_token" ] && [ "$access_token" != "null" ]; then
 		echo 'Got new "access" token.'
 	else
-		echo Something went wrong.
-		exit
+		echo Something went wrong.; exit 125
 	fi
 fi
 
