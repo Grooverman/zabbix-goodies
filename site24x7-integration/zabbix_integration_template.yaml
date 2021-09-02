@@ -1,0 +1,118 @@
+zabbix_export:
+  version: '5.4'
+  date: '2021-09-02T17:59:51Z'
+  groups:
+    -
+      uuid: eda420123dad449d9930494bfcd926da
+      name: Integrations
+  templates:
+    -
+      uuid: f6957c244f7846da83477bb6793bc80d
+      template: 'Site24x7 Integration'
+      name: 'Site24x7 Integration'
+      groups:
+        -
+          name: Integrations
+      discovery_rules:
+        -
+          uuid: 08482f177a2040b18ebe8b55f4dca96e
+          name: 'Site24x7 Discovery'
+          type: TRAP
+          key: site24x7_discovery
+          delay: '0'
+          lifetime: 1d
+          item_prototypes:
+            -
+              uuid: 82471ec8ee9a43dc8d5a3b92cb131982
+              name: '{#NAME}'
+              type: TRAP
+              key: 'monitor_status["{#MONITOR_ID}"]'
+              delay: '0'
+              history: 1d
+              trends: 1w
+              description: |
+                Label:  {#ATTRIBUTE_LABEL}
+                Name: {#ATTRIBUTE_NAME}
+                Type:   {#MONITOR_TYPE}
+              valuemap:
+                name: 'Status Constants'
+              trigger_prototypes:
+                -
+                  uuid: 97faa487ea05467a874b8a8e81a603ac
+                  expression: 'last(/Site24x7 Integration/monitor_status["{#MONITOR_ID}"])=3'
+                  name: 'CRITICAL: {#NAME}'
+                  url: 'https://www.site24x7.com/app/client#/alarms/{#MONITOR_ID}/Summary'
+                  priority: AVERAGE
+                  manual_close: 'YES'
+                -
+                  uuid: dd0f9850369f4d6a9553880f1efe8a90
+                  expression: 'last(/Site24x7 Integration/monitor_status["{#MONITOR_ID}"])=0'
+                  name: 'DOWN: {#NAME}'
+                  url: 'https://www.site24x7.com/app/client#/alarms/{#MONITOR_ID}/Summary'
+                  priority: HIGH
+                  manual_close: 'YES'
+                -
+                  uuid: 24077454fd164956a6fbe7adf68d4229
+                  expression: 'last(/Site24x7 Integration/monitor_status["{#MONITOR_ID}"])=2'
+                  name: 'TROUBLE: {#NAME}'
+                  url: 'https://www.site24x7.com/app/client#/alarms/{#MONITOR_ID}/Summary'
+                  priority: WARNING
+                  manual_close: 'YES'
+                -
+                  uuid: 404630728f2f474abbc07d9818e28e63
+                  expression: 'last(/Site24x7 Integration/monitor_status["{#MONITOR_ID}"])>3'
+                  name: '{#NAME}'
+                  url: 'https://www.site24x7.com/app/client#/alarms/{#MONITOR_ID}/Summary'
+                  priority: INFO
+                  manual_close: 'YES'
+          lld_macro_paths:
+            -
+              lld_macro: '{#ATTRIBUTE_LABEL}'
+              path: $.attribute_label
+            -
+              lld_macro: '{#ATTRIBUTE_NAME}'
+              path: $.attributeName
+            -
+              lld_macro: '{#MONITOR_ID}'
+              path: $.monitor_id
+            -
+              lld_macro: '{#MONITOR_TYPE}'
+              path: $.monitor_type
+            -
+              lld_macro: '{#NAME}'
+              path: $.name
+          preprocessing:
+            -
+              type: JSONPATH
+              parameters:
+                - '$.[:]'
+      valuemaps:
+        -
+          uuid: a9628422245f4e529b0e1c76a115ccda
+          name: 'Status Constants'
+          mappings:
+            -
+              value: '0'
+              newvalue: Down
+            -
+              value: '1'
+              newvalue: Up
+            -
+              value: '2'
+              newvalue: Trouble
+            -
+              value: '3'
+              newvalue: Critical
+            -
+              value: '5'
+              newvalue: Suspended
+            -
+              value: '7'
+              newvalue: Maintenance
+            -
+              value: '9'
+              newvalue: Discovery
+            -
+              value: '10'
+              newvalue: 'Configuration Error'
+
