@@ -1,12 +1,8 @@
 #!/bin/bash
 
-# define urls
-api_url="https://www.site24x7.com/api"
-auth_url="https://accounts.zoho.com/oauth/v2/token"
-
-# get credentials
+# get constants from configuration file
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
-source $SCRIPT_DIR/credentials.ini
+source $SCRIPT_DIR/config.ini
 
 # get refresh token if grant token provided
 function get_refresh_token () {
@@ -44,12 +40,22 @@ else
 	fi
 fi
 
+# process monitors data
 function get_current_status () {
 	curl -s -G $api_url/current_status \
-		-d "status_required=0,2,3,10" \
+		-d "status_required=0,1,2,3,10" \
 		-d "group_required=false" \
 		-H "Authorization: Zoho-oauthtoken $access_token"
 }
+monitors=$(get_current_status | jq '.data.monitors')
 
-get_current_status | jq '.data.monitors'
+# send discovery data, statuses, or show all data
+if [[ "$1" == "discovery" ]]; then
+	echo '"Site24x7"' site24x7_discovery $monitors \
+		| ./zabbix_sender -vv -z $zabbix_server -i -
+elif [[ "$1" == "poll" ]]; then
+	echo sending data
+else
+	echo $monitors
+fi
 
