@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# get constants from configuration file
+# get configuration
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 config_file=$SCRIPT_DIR/config.ini
 source <(grep = $config_file | sed 's/ *= */=/g' | sed "s/;/#/g")
