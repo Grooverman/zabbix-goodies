@@ -1,3 +1,4 @@
 **/credentials.ini
-**/credentials.ini.bkp
+**/*.bkp
+**/config.ini
 **/sample.json
