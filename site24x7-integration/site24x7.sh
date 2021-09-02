@@ -2,7 +2,8 @@
 
 # get constants from configuration file
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
-source $SCRIPT_DIR/config.ini
+config_file=$SCRIPT_DIR/config.ini
+source <(grep = $config_file | sed 's/ *= */=/g' | sed "s/;/#/g")
 
 # get refresh token if grant token provided
 function get_refresh_token () {
