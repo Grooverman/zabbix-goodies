@@ -52,7 +52,7 @@ monitors=$(get_current_status | jq '.data.monitors')
 
 # send discovery data, or statuses, or show all data
 if [[ "$1" == "discovery" ]]; then
-	echo '"Site24x7"' site24x7_discovery $monitors \
+	echo '"Site24x7"' $zabbix_discovery_key $monitors \
 		| ./zabbix_sender -vv -z $zabbix_server -i -
 elif [[ "$1" == "poll" ]]; then
 	echo sending data

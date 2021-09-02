@@ -1,7 +1,8 @@
 [Zabbix]
 ### Zabbix related parameters ###
 zabbix_server="127.0.0.1"
-zabbix_key="monitor_id"
+zabbix_item_key="monitor_status"
+zabbix_discovery_key="site24x7_discovery"
 
 [Site24x7]
 ### urls ###
