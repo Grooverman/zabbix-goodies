@@ -57,6 +57,6 @@ if [[ "$1" == "discovery" ]]; then
 elif [[ "$1" == "poll" ]]; then
 	echo sending data
 else
-	echo $monitors
+	echo $monitors | jq
 fi
 
