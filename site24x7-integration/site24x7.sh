@@ -55,7 +55,20 @@ if [[ "$1" == "discovery" ]]; then
 	echo $zabbix_host_name $zabbix_discovery_key $monitors \
 		| ./zabbix_sender -vv -z $zabbix_server -i -
 elif [[ "$1" == "poll" ]]; then
-	echo sending data
+	echo sending data...
+	jq_command='.[] |
+		[
+			$zs, 
+			(
+				.monitor_id | 
+					sub( "^(?<id>.*)"; $zk + "[" + .id + "]" )
+			), 
+			.status
+		] | join(" ")'
+	echo $monitors | jq -r -c \
+		--arg zs $zabbix_host_name \
+		--arg zk $zabbix_item_key \
+		"$jq_command"
 else
 	echo $monitors | jq
 fi
