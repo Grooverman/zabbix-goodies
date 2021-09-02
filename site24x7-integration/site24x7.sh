@@ -60,7 +60,7 @@ elif [[ "$1" == "poll" ]]; then
 			$zh, 
 			(
 				.monitor_id | 
-					sub( "^(?<id>.*)"; $zh + "[\"" + .id + "\"]" )
+					sub( "^(?<id>.*)"; $zk + "[\"" + .id + "\"]" )
 			), 
 			.status
 		] | join(" ")'
