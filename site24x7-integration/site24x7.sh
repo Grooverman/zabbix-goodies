@@ -2,8 +2,8 @@
 
 # get configuration
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
-config_file=$SCRIPT_DIR/config.ini
-source <(grep = $config_file | sed 's/ *= */=/g' | sed "s/;/#/g")
+CONFIG_FILE=$SCRIPT_DIR/config.ini
+source <(grep = $CONFIG_FILE | sed 's/ *= */=/g' | sed "s/;/#/g")
 
 # get refresh token if grant token provided
 function get_refresh_token () {
