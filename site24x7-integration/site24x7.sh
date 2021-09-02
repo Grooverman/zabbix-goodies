@@ -50,7 +50,7 @@ function get_current_status () {
 }
 monitors=$(get_current_status | jq '.data.monitors')
 
-# send discovery data, statuses, or show all data
+# send discovery data, or statuses, or show all data
 if [[ "$1" == "discovery" ]]; then
 	echo '"Site24x7"' site24x7_discovery $monitors \
 		| ./zabbix_sender -vv -z $zabbix_server -i -
