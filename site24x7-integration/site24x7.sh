@@ -50,11 +50,12 @@ function get_current_status () {
 }
 monitors=$(get_current_status | jq '.data.monitors')
 
-# send discovery data, or statuses, or show all data
-if [[ "$1" == "discovery" ]]; then
+# send discovery data, or statuses, or show data
+function discover () {
 	echo $zabbix_host_name $zabbix_discovery_key $monitors \
 		| ./zabbix_sender -vv -z $zabbix_server -i -
-elif [[ "$1" == "poll" ]]; then
+}
+function send_status_data () {
 	jq_command='.[] |
 		[
 			$zh, 
@@ -69,7 +70,15 @@ elif [[ "$1" == "poll" ]]; then
 		--arg zk $zabbix_item_key \
 		"$jq_command" \
 		| ./zabbix_sender -vv -z $zabbix_server -i -
-else
+}
+if [[ "$1" == "discovery" ]]; then
+	discover
+elif [[ "$1" == "poll" ]]; then
+	send_status_data
+elif [[ "$1" == "show" ]]; then
 	echo $monitors | jq
+else
+	discover
+	send_status_data
 fi
 
