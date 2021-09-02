@@ -57,15 +57,15 @@ if [[ "$1" == "discovery" ]]; then
 elif [[ "$1" == "poll" ]]; then
 	jq_command='.[] |
 		[
-			$zs, 
+			$zh, 
 			(
 				.monitor_id | 
-					sub( "^(?<id>.*)"; $zk + "[\"" + .id + "\"]" )
+					sub( "^(?<id>.*)"; $zh + "[\"" + .id + "\"]" )
 			), 
 			.status
 		] | join(" ")'
 	echo $monitors | jq -r -c \
-		--arg zs $zabbix_host_name \
+		--arg zh $zabbix_host_name \
 		--arg zk $zabbix_item_key \
 		"$jq_command" \
 		| ./zabbix_sender -vv -z $zabbix_server -i -
