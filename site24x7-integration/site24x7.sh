@@ -61,14 +61,15 @@ elif [[ "$1" == "poll" ]]; then
 			$zs, 
 			(
 				.monitor_id | 
-					sub( "^(?<id>.*)"; $zk + "[" + .id + "]" )
+					sub( "^(?<id>.*)"; $zk + "[\"" + .id + "\"]" )
 			), 
 			.status
 		] | join(" ")'
 	echo $monitors | jq -r -c \
 		--arg zs $zabbix_host_name \
 		--arg zk $zabbix_item_key \
-		"$jq_command"
+		"$jq_command" \
+		| ./zabbix_sender -vv -z $zabbix_server -i -
 else
 	echo $monitors | jq
 fi
