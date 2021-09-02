@@ -1,1 +1,11 @@
 ### Awesome KISSy Site24x7/Zabbix integration.
+
+1. Create a host called "Site24x7" on Zabbix.
+2. Import the template, and apply to that host.
+3. Configure the script, and run it via cron every 1 minute.
+
+Enjoy!
+
+
+ᴹᵃᵈᵉ ʷᶦᵗʰ ♥️ ᵇʸ ᴿᵉᶦⁿᵛᵉⁿᵗᵀʰᵉᵂʰᵉᵉˡ
+
