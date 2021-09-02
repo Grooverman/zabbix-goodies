@@ -20,7 +20,7 @@ if [ -n "$grant_token" ]; then
 	access_token=$(echo $json | jq -r '.access_token')
 	if [ -n "$access_token" ] && [ "$access_token" != "null" ]; then
 		echo 'Got new "refresh" token, and "access" token.'
-		cred=$SCRIPT_DIR/credentials.ini
+		cred=$CONFIG_FILE
 		sed -i "s/^refresh_token=.*\$/refresh_token=$refresh_token/" $cred
 		sed -i 's/^grant_token=.*/grant_token=/' $cred
 	else
