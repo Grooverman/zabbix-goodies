@@ -1,8 +1,10 @@
+[Zabbix]
 ### Zabbix related parameters ###
 zabbix_server="127.0.0.1"
 zabbix_key="monitor_id"
 
-### Site24x7 related parameters ###
+[Site24x7]
+### urls ###
 api_url="https://www.site24x7.com/api"
 auth_url="https://accounts.zoho.com/oauth/v2/token"
 
