@@ -54,7 +54,7 @@ monitors=$(get_current_status | jq '.data.monitors')
 function discover () {
 	echo Sending discovery data...
 	echo $zabbix_host_name $zabbix_discovery_key $monitors \
-		| ./zabbix_sender -vv -z $zabbix_server -i -
+		| $SCRIPT_DIR/zabbix_sender -vv -z $zabbix_server -i -
 }
 function send_status_data () {
 	echo Sending monitor status data...
@@ -71,7 +71,7 @@ function send_status_data () {
 		--arg zh $zabbix_host_name \
 		--arg zk $zabbix_item_key \
 		"$jq_command" \
-		| ./zabbix_sender -vv -z $zabbix_server -i -
+		| $SCRIPT_DIR/zabbix_sender -vv -z $zabbix_server -i -
 }
 if [[ "$1" == "discovery" ]]; then
 	discover
