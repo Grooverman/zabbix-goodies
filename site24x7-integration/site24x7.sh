@@ -19,7 +19,7 @@ if [ -n "$grant_token" ]; then
 	refresh_token=$(echo $json | jq -r '.refresh_token')
 	access_token=$(echo $json | jq -r '.access_token')
 	if [ -n "$access_token" ] && [ "$access_token" != "null" ]; then
-		echo 'Got new "refresh" token, and "access" token.'
+		echo `date +"%m-%d %H:%M:%S"` 'Got new "refresh" token, and "access" token.'
 		cred=$CONFIG_FILE
 		sed -i "s/^refresh_token=.*\$/refresh_token=$refresh_token/" $cred
 		sed -i 's/^grant_token=.*/grant_token=/' $cred
@@ -35,7 +35,7 @@ else
 		-d "refresh_token=$refresh_token" \
 		-d "grant_type=refresh_token" | jq -r '.access_token')
 	if [ -n "$access_token" ] && [ "$access_token" != "null" ]; then
-		echo 'Got new "access" token.'
+		echo `date +"%m-%d %H:%M:%S"` 'Got new "access" token.'
 	else
 		echo Something went wrong.; exit 125
 	fi
@@ -52,12 +52,12 @@ monitors=$(get_current_status | jq '.data.monitors')
 
 # send discovery data, or statuses, or show data
 function discover () {
-	echo Sending discovery data...
+	echo `date +"%m-%d %H:%M:%S"` Sending discovery data...
 	echo $zabbix_host_name $zabbix_discovery_key $monitors \
 		| $SCRIPT_DIR/zabbix_sender -vv -z $zabbix_server -i -
 }
 function send_status_data () {
-	echo Sending monitor status data...
+	echo `date +"%m-%d %H:%M:%S"` Sending monitor status data...
 	jq_command='.[] |
 		[
 			$zh, 
