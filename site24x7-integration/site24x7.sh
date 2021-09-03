@@ -52,10 +52,12 @@ monitors=$(get_current_status | jq '.data.monitors')
 
 # send discovery data, or statuses, or show data
 function discover () {
+	echo Sending discovery data...
 	echo $zabbix_host_name $zabbix_discovery_key $monitors \
 		| ./zabbix_sender -vv -z $zabbix_server -i -
 }
 function send_status_data () {
+	echo Sending monitor status data...
 	jq_command='.[] |
 		[
 			$zh, 
