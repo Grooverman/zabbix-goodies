@@ -68,7 +68,7 @@ function send_status_data () {
 			.status
 		] | join(" ")'
 	echo $monitors | jq -r -c \
-		--arg zh $zabbix_host_name \
+		--arg zh "\"$zabbix_host_name\"" \
 		--arg zk $zabbix_item_key \
 		"$jq_command" \
 		| $SCRIPT_DIR/zabbix_sender -vv -z $zabbix_server -i -
