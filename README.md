@@ -1,4 +1,2 @@
 # zabbix-goodies
-Stuff that can be used on Zabbix.
-
-
+Scripts and tuff that can be used on Zabbix.
