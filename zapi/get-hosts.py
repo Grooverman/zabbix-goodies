@@ -13,7 +13,7 @@ zapi = ZabbixAPI(
 hosts = zapi.host.get(
         search='%%',
         monitored_hosts=True,
-#        with_monitored_triggers=True,
+        with_monitored_triggers=True,
         selectHttpTests=True,
         output=['host', 'httpTests'])
 
