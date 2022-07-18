@@ -3,3 +3,4 @@
 **/config.ini
 **/config.py
 **/sample.json
+**/__pycache__
