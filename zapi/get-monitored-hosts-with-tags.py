@@ -14,6 +14,7 @@ hosts = zapi.host.get(
         selectTags='extend',
         output=['host', 'httpTests'])
 
+# print csv
 print('host' + ';' + 'hostid' + ';' + 'responsible' + ';' + 'service')
 for i in hosts:
     responsible = ''
