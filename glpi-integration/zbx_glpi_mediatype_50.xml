@@ -1,0 +1,376 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<zabbix_export>
+    <version>5.0</version>
+    <date>2022-09-06T14:04:49Z</date>
+    <media_types>
+        <media_type>
+            <name>GLPI (webhook)</name>
+            <type>WEBHOOK</type>
+	    <parameters>
+		<parameter>
+                    <name>alert_message</name>
+                    <value>{ALERT.MESSAGE}</value>
+                </parameter>
+                <parameter>
+                    <name>alert_subject</name>
+                    <value>{ALERT.SUBJECT}</value>
+                </parameter>
+                <parameter>
+                    <name>event_id</name>
+                    <value>{EVENT.ID}</value>
+                </parameter>
+                <parameter>
+                    <name>event_nseverity</name>
+                    <value>{EVENT.NSEVERITY}</value>
+                </parameter>
+                <parameter>
+                    <name>event_recovery_value</name>
+                    <value>{EVENT.RECOVERY.VALUE}</value>
+                </parameter>
+                <parameter>
+                    <name>event_source</name>
+                    <value>{EVENT.SOURCE}</value>
+                </parameter>
+                <parameter>
+                    <name>event_update_status</name>
+                    <value>{EVENT.UPDATE.STATUS}</value>
+                </parameter>
+                <parameter>
+                    <name>event_value</name>
+                    <value>{EVENT.VALUE}</value>
+                </parameter>
+                <parameter>
+                    <name>glpi_problem_id</name>
+                    <value>{EVENT.TAGS.__zbx_glpi_problem_id}</value>
+                </parameter>
+                <parameter>
+                    <name>glpi_token</name>
+                    <value>&lt;PLACE GLPI TOKEN&gt;</value>
+                </parameter>
+                <parameter>
+                    <name>glpi_url</name>
+                    <value>&lt;PLACE GLPI URL&gt;</value>
+                </parameter>
+                <parameter>
+                    <name>trigger_id</name>
+                    <value>{TRIGGER.ID}</value>
+                </parameter>
+                <parameter>
+                    <name>zabbix_url</name>
+                    <value>{$ZABBIX.URL}</value>
+	        </parameter>
+            </parameters>
+            <attempts>1</attempts>
+            <script>var GLPi = {&#13;
+    params: {},&#13;
+&#13;
+    setParams: function (params) {&#13;
+        if (typeof params !== 'object') {&#13;
+            return;&#13;
+        }&#13;
+        GLPi.params = params;&#13;
+    },&#13;
+&#13;
+    setProxy: function (HTTPProxy) {&#13;
+        GLPi.HTTPProxy = HTTPProxy;&#13;
+    },&#13;
+&#13;
+    urlCheckFormat: function (url) {&#13;
+        if (typeof url === 'string' &amp;&amp; !url.endsWith('/')) {&#13;
+            url += '/';&#13;
+        }&#13;
+&#13;
+        if (url.indexOf('http://') === -1 &amp;&amp; url.indexOf('https://') === -1) {&#13;
+            url = 'https://' + url;&#13;
+        }&#13;
+&#13;
+        return url;&#13;
+    },&#13;
+&#13;
+    getAuthToken: function (url, token, app_token) {&#13;
+        var response,&#13;
+            request = new CurlHttpRequest();&#13;
+&#13;
+        request.AddHeader('Content-Type: application/json');&#13;
+        request.AddHeader('Authorization: user_token ' + token);&#13;
+        request.AddHeader('App-Token: ' + app_token);&#13;
+&#13;
+        response = request.Get(url + &quot;apirest.php/initSession&quot;);&#13;
+&#13;
+        if (response !== null) {&#13;
+            try {&#13;
+                response = JSON.parse(response);&#13;
+            }&#13;
+            catch (error) {&#13;
+                Zabbix.Log(4, '[ GLPi Webhook ] Failed to receive authentication token from GLPi.');&#13;
+                response = null;&#13;
+            }&#13;
+        }&#13;
+&#13;
+        if (Array.isArray(response)) {&#13;
+            if (response[1]) {&#13;
+                throw 'Error received from GLPi: ' + response[1];&#13;
+            } else {&#13;
+                throw 'Failed to receive authentication token from GLPi.';&#13;
+            }&#13;
+        }&#13;
+&#13;
+        if (typeof response !== 'object' || !response.session_token) {&#13;
+            throw 'Failed to process response received from getting GLPi authentication token. Check debug log for more information.';&#13;
+        }&#13;
+&#13;
+        return response.session_token;&#13;
+    },&#13;
+&#13;
+    getProblemUrl: function (zabbix_url, triggerid, eventid, event_source) {&#13;
+        var problem_url = zabbix_url;&#13;
+&#13;
+        if (event_source === '0') {&#13;
+            problem_url += 'tr_events.php?triggerid=' + triggerid + '&amp;eventid=' + eventid;&#13;
+        }&#13;
+&#13;
+        return problem_url;&#13;
+    },&#13;
+&#13;
+    request: function (method, url, data) {&#13;
+        if (typeof GLPi.params !== 'object' || typeof GLPi.params.authToken === 'undefined' || GLPi.params.authToken === '') {&#13;
+            throw 'Required GLPi param authToken is not set.';&#13;
+        }&#13;
+&#13;
+        var response,&#13;
+            request = new CurlHttpRequest();&#13;
+&#13;
+        request.AddHeader('Content-Type: application/json');&#13;
+        request.AddHeader('Session-Token:' + GLPi.params.authToken);&#13;
+        request.AddHeader('App-Token: ' + GLPi.params.app_token);&#13;
+&#13;
+        if (typeof GLPi.HTTPProxy !== 'undefined' &amp;&amp; GLPi.HTTPProxy !== '') {&#13;
+            request.SetProxy(GLPi.HTTPProxy);&#13;
+        }&#13;
+&#13;
+        if (typeof data !== 'undefined') {&#13;
+            data = JSON.stringify(data);&#13;
+        }&#13;
+&#13;
+        Zabbix.Log(4, '[ GLPi Webhook ] Sending request: ' + url + ((typeof data === 'string')&#13;
+            ? ('\n' + data)&#13;
+            : ''));&#13;
+&#13;
+        switch (method) {&#13;
+            case 'post':&#13;
+                response = request.Post(url, data);&#13;
+                break;&#13;
+&#13;
+            case 'put':&#13;
+                response = request.Put(url, data);&#13;
+                break;&#13;
+&#13;
+            default:&#13;
+                throw 'Unsupported HTTP request method: ' + method;&#13;
+        }&#13;
+&#13;
+        Zabbix.Log(4, '[ GLPi Webhook ] Received response with status code ' +&#13;
+            request.Status() + '\n' + response);&#13;
+&#13;
+        if (response !== null) {&#13;
+            try {&#13;
+                response = JSON.parse(response);&#13;
+            }&#13;
+            catch (error) {&#13;
+                Zabbix.Log(4, '[ GLPi Webhook ] Failed to parse response received from GLPi');&#13;
+                response = null;&#13;
+            }&#13;
+        }&#13;
+&#13;
+        if (typeof response !== 'object' || typeof response === 'undefined' || response === null) {&#13;
+            throw 'Failed to process response received from GLPi. Check debug log for more information.';&#13;
+        }&#13;
+&#13;
+        if (request.Status() &lt; 200 || request.Status() &gt;= 300) {&#13;
+            var message = 'Request failed with status code ' + request.Status();&#13;
+&#13;
+            if (response.message) {&#13;
+                message += ': ' + response.message;&#13;
+            }&#13;
+&#13;
+            throw message + ' Check debug log for more information.';&#13;
+        }&#13;
+&#13;
+        return response;&#13;
+    }&#13;
+};&#13;
+&#13;
+try {&#13;
+    var params = JSON.parse(value),&#13;
+        glpi = {},&#13;
+        url = '',&#13;
+        data = {},&#13;
+        comment_data,&#13;
+        result = { tags: {} },&#13;
+        required_params = [&#13;
+            'alert_subject', 'alert_message', 'event_source', 'event_value',&#13;
+            'event_update_status', 'event_recovery_value',&#13;
+            'event_id', 'trigger_id', 'zabbix_url',&#13;
+            'glpi_token', 'glpi_url', 'glpi_app_token'&#13;
+        ],&#13;
+        method = 'post',&#13;
+        process_tags = true,&#13;
+        response;&#13;
+&#13;
+    Object.keys(params)&#13;
+        .forEach(function (key) {&#13;
+            if (key.startsWith('glpi_')) {&#13;
+                glpi[key.substring(5)] = params[key];&#13;
+            }&#13;
+            else if (required_params.indexOf(key) !== -1 &amp;&amp; params[key] === '') {&#13;
+                throw 'Parameter &quot;' + key + '&quot; can\'t be empty.';&#13;
+            }&#13;
+        });&#13;
+&#13;
+    if ([0, 1, 2, 3].indexOf(parseInt(params.event_source)) === -1) {&#13;
+        throw 'Incorrect &quot;event_source&quot; parameter given: ' + params.event_source + '\nMust be 0-3.';&#13;
+    }&#13;
+&#13;
+    // Check {EVENT.VALUE} for trigger-based and internal events.&#13;
+    if (params.event_value !== '0' &amp;&amp; params.event_value !== '1'&#13;
+        &amp;&amp; (params.event_source === '0' || params.event_source === '3')) {&#13;
+        throw 'Incorrect &quot;event_value&quot; parameter given: ' + params.event_value + '\nMust be 0 or 1.';&#13;
+    }&#13;
+&#13;
+    // Check {EVENT.UPDATE.STATUS} only for trigger-based events.&#13;
+    if (params.event_update_status !== '0' &amp;&amp; params.event_update_status !== '1' &amp;&amp; params.event_source === '0') {&#13;
+        throw 'Incorrect &quot;event_update_status&quot; parameter given: ' + params.event_update_status + '\nMust be 0 or 1.';&#13;
+    }&#13;
+&#13;
+    if (params.event_source !== '0' &amp;&amp; params.event_recovery_value === '0') {&#13;
+        throw 'Recovery operations are supported only for trigger-based actions.';&#13;
+    }&#13;
+&#13;
+    if (typeof params.zabbix_url !== 'string' || params.zabbix_url.trim() === '' || params.zabbix_url === '{$ZABBIX.URL}') {&#13;
+        throw 'Field &quot;zabbix_url&quot; cannot be empty.';&#13;
+    }&#13;
+&#13;
+    // Check for backslash in the end of url and schema.&#13;
+    glpi.url = GLPi.urlCheckFormat(glpi.url);&#13;
+    params.zabbix_url = GLPi.urlCheckFormat(params.zabbix_url);&#13;
+&#13;
+    glpi.authToken = GLPi.getAuthToken(glpi.url, glpi.token, glpi.app_token);&#13;
+    GLPi.setParams(glpi);&#13;
+&#13;
+    data = {&#13;
+        'input': {&#13;
+            'name': params.alert_subject,&#13;
+            'content': params.alert_message + '\n&lt;a href=' + GLPi.getProblemUrl(params.zabbix_url, params.trigger_id, params.event_id, params.event_source) + '&gt;Link to problem in Zabbix&lt;/a&gt;',&#13;
+            'status': 1,  // Set status &quot;New&quot;&#13;
+            'urgency': params.event_nseverity&#13;
+        }&#13;
+    };&#13;
+&#13;
+    // In case of resolve&#13;
+    if (params.event_source === '0' &amp;&amp; params.event_value === '0') {&#13;
+        process_tags = false;&#13;
+        dataFollowup = {&#13;
+            'input': {&#13;
+                'items_id': glpi.problem_id,&#13;
+                'itemtype': 'Ticket',&#13;
+                'content': params.alert_message + '\n&lt;a href=' + GLPi.getProblemUrl(params.zabbix_url, params.trigger_id, params.event_id, params.event_source) + '&gt;Link to problem in Zabbix&lt;/a&gt;'&#13;
+            }&#13;
+        };&#13;
+        dataProblem = {&#13;
+            'id': glpi.problem_id,&#13;
+            'input': {&#13;
+                'name': params.alert_subject,&#13;
+                'status': 5,  // Set status &quot;Solved&quot;&#13;
+                'urgency': params.event_nseverity&#13;
+            }&#13;
+        };&#13;
+&#13;
+        GLPi.request('put', glpi.url + 'apirest.php/Ticket/' + glpi.problem_id, dataProblem);&#13;
+        GLPi.request('post', glpi.url + 'apirest.php/Ticket/' + glpi.problem_id + '/ITILFollowup', dataFollowup);&#13;
+    }&#13;
+&#13;
+    // In case of update&#13;
+    else if (params.event_source === '0' &amp;&amp; params.event_update_status === '1') {&#13;
+        process_tags = false;&#13;
+        dataFollowup = {&#13;
+            'input': {&#13;
+                'items_id': glpi.problem_id,&#13;
+                'itemtype': 'Ticket',&#13;
+                'content': params.alert_message + '\n&lt;a href=' + GLPi.getProblemUrl(params.zabbix_url, params.trigger_id, params.event_id, params.event_source) + '&gt;Link to problem in Zabbix&lt;/a&gt;'&#13;
+            }&#13;
+        };&#13;
+        dataProblem = {&#13;
+            'id': glpi.problem_id,&#13;
+            'input': {&#13;
+                'name': params.alert_subject,&#13;
+                'urgency': params.event_nseverity&#13;
+            }&#13;
+        };&#13;
+&#13;
+        GLPi.request('put', glpi.url + 'apirest.php/Ticket/' + glpi.problem_id, dataProblem);&#13;
+        GLPi.request('post', glpi.url + 'apirest.php/Ticket/' + glpi.problem_id + '/ITILFollowup', dataFollowup);&#13;
+    }&#13;
+&#13;
+    // In case of problem&#13;
+    else {&#13;
+        response = GLPi.request('post', glpi.url + 'apirest.php/Ticket/', data);&#13;
+    }&#13;
+&#13;
+    if (process_tags) {&#13;
+        result.tags.__zbx_glpi_problem_id = response.id;&#13;
+        result.tags.__zbx_glpi_link = glpi.url + 'front/ticket.form.php?id=' + response.id;&#13;
+    }&#13;
+&#13;
+    Zabbix.Log(4, '[ GLPi Webhook ] Result: ' + JSON.stringify(result));&#13;
+    return JSON.stringify(result);&#13;
+}&#13;
+catch (error) {&#13;
+    Zabbix.Log(4, '[ GLPi Webhook ] ERROR: ' + error);&#13;
+    throw 'Sending failed: ' + error;&#13;
+}</script>
+            <process_tags>YES</process_tags>
+            <show_event_menu>YES</show_event_menu>
+            <event_menu_url>{EVENT.TAGS.__zbx_glpi_link}</event_menu_url>
+            <event_menu_name>GLPi: Problem {EVENT.TAGS.__zbx_glpi_problem_id}</event_menu_name>
+            <message_templates>
+                <message_template>
+                    <event_source>TRIGGERS</event_source>
+                    <operation_mode>PROBLEM</operation_mode>
+                    <subject>{HOST.NAME} - {EVENT.NAME}</subject>
+                    <message>Event status: {EVENT.STATUS}&#13;
+Problem started at {EVENT.TIME} on {EVENT.DATE}&#13;
+Problem name: {EVENT.NAME}&#13;
+Host: {HOST.NAME}&#13;
+Severity: {EVENT.SEVERITY}&#13;
+Operational data: {EVENT.OPDATA}&#13;
+Original problem ID: {EVENT.ID}&#13;
+{TRIGGER.URL}</message>
+                </message_template>
+                <message_template>
+                    <event_source>TRIGGERS</event_source>
+                    <operation_mode>RECOVERY</operation_mode>
+                    <subject>{HOST.NAME} - {EVENT.NAME}</subject>
+                    <message>Event status: {EVENT.STATUS}&#13;
+Problem has been resolved in {EVENT.DURATION} at {EVENT.RECOVERY.TIME} on {EVENT.RECOVERY.DATE}&#13;
+Problem name: {EVENT.NAME}&#13;
+Host: {HOST.NAME}&#13;
+Severity: {EVENT.SEVERITY}&#13;
+Original problem ID: {EVENT.ID}&#13;
+{TRIGGER.URL}</message>
+                </message_template>
+                <message_template>
+                    <event_source>TRIGGERS</event_source>
+                    <operation_mode>UPDATE</operation_mode>
+                    <subject>{HOST.NAME} - {EVENT.NAME}</subject>
+                    <message>Event status: {EVENT.STATUS}&#13;
+&#13;
+{USER.FULLNAME} {EVENT.UPDATE.ACTION} problem at {EVENT.UPDATE.DATE} {EVENT.UPDATE.TIME}.&#13;
+{EVENT.UPDATE.MESSAGE}&#13;
+&#13;
+Current problem status is {EVENT.STATUS}, acknowledged: {EVENT.ACK.STATUS}.</message>
+                </message_template>
+            </message_templates>
+        </media_type>
+    </media_types>
+</zabbix_export>
+
