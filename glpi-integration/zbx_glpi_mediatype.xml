@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <zabbix_export>
-    <version>6.0</version>
-    <date>2022-09-06T14:24:49Z</date>
+    <version>5.0</version>
+    <date>2022-09-06T14:04:49Z</date>
     <media_types>
         <media_type>
-            <name>GLPi</name>
+            <name>GLPI (webhook)</name>
             <type>WEBHOOK</type>
-            <parameters>
-                <parameter>
+	    <parameters>
+		<parameter>
                     <name>alert_message</name>
                     <value>{ALERT.MESSAGE}</value>
                 </parameter>
@@ -58,7 +58,7 @@
                 <parameter>
                     <name>zabbix_url</name>
                     <value>{$ZABBIX.URL}</value>
-                </parameter>
+	        </parameter>
             </parameters>
             <attempts>1</attempts>
             <script>var GLPi = {
