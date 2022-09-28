@@ -14,11 +14,12 @@ hosts = zapi.host.get(
         search='%%',
         monitored_hosts=True,
         with_monitored_triggers=True,
-        selectHttpTests=True,
+#        selectHttpTests=True,
+        selectInterfaces=['ip'],
         output=['host', 'httpTests'])
 
-#print(json.dumps(hosts))
-print(yaml.dump(hosts))
+print(json.dumps(hosts))
+#print(yaml.dump(hosts))
 exit()
 
 
