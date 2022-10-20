@@ -11,15 +11,13 @@ zapi = ZabbixAPI(
         user=REMOTE_ZABBIX_USER,
         password=REMOTE_ZABBIX_PASSWORD)
 hosts = zapi.host.get(
-        search='%%',
+#        search='%%',
         monitored_hosts=True,
         with_monitored_triggers=True,
-#        selectHttpTests=True,
         selectInterfaces=['ip'],
-        output=['host', 'httpTests'])
+        output=['name', 'httpTests', 'triggers'])
 
 print(json.dumps(hosts))
 #print(yaml.dump(hosts))
 exit()
-
 
