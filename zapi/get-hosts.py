@@ -15,7 +15,8 @@ hosts = zapi.host.get(
         monitored_hosts=True,
         with_monitored_triggers=True,
         selectInterfaces=['ip'],
-        output=['name', 'httpTests', 'triggers'])
+        selectTriggers='count',
+        output=['name', 'httpTests'])
 
 print(json.dumps(hosts))
 #print(yaml.dump(hosts))
