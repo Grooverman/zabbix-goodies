@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 import json
-import yaml
 from pprint import pformat
 from pyzabbix import ZabbixAPI
 from config import *
@@ -11,7 +10,6 @@ zapi = ZabbixAPI(
         user=REMOTE_ZABBIX_USER,
         password=REMOTE_ZABBIX_PASSWORD)
 hosts = zapi.host.get(
-#        search='%%',
         monitored_hosts=True,
         with_monitored_triggers=True,
         selectInterfaces=['ip'],
@@ -19,6 +17,5 @@ hosts = zapi.host.get(
         output=['name', 'httpTests'])
 
 print(json.dumps(hosts))
-#print(yaml.dump(hosts))
 exit()
 
